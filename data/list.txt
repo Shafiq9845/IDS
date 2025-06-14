@@ -1,0 +1,1 @@
+download dataset from the internet and extract here(http://cicresearch.ca/CICDataset/CIC-IDS-2017/Dataset/CIC-IDS-2017/CSVs/)
