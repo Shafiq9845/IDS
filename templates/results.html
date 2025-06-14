@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: #1c2331;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #e0e6ed;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1.5rem 0;
+            color: #00fff7;
+        }
+        .summary-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #232b3e;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 1.5rem 2rem 1.2rem 2rem;
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 600px;
+        }
+        .summary-row {
+            margin: 0.3rem 0;
+            font-size: 1.1rem;
+            color: #6ee7ef;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .summary-row strong {
+            color: #00fff7;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+        .accuracy-block {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .accuracy-block h3 {
+            margin: 0.5rem 0;
+            color: #6ee7ef;
+            font-weight: 500;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            background: #232b3e;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        th, td {
+            padding: 0.7rem 1.2rem;
+            text-align: center;
+        }
+        th {
+            background: #1c2331;
+            color: #00fff7;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background: #232b3e;
+        }
+        tr:nth-child(odd) {
+            background: #283046;
+        }
+        a {
+            display: inline-block;
+            margin: 2rem 0 1rem 0;
+            padding: 0.7rem 2rem;
+            background: #00fff7;
+            color: #232b3e;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s, color 0.2s;
+        }
+        a:hover {
+            background: #1c92d2;
+            color: #fff;
+        }
+        @media (max-width: 700px) {
+            .summary-block {
+                padding: 1rem 0.5rem 1rem 0.5rem;
+                max-width: 98vw;
+            }
+            table, th, td {
+                font-size: 0.95rem;
+                padding: 0.5rem 0.5rem;
+            }
+            h2 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Prediction Results</h2>
+    <div class="accuracy-block">
+        {% if metrics.rf_accuracy %}
+            <h3>Random Forest Accuracy: {{ metrics.rf_accuracy | round(4) }}</h3>
+            <h3>XGBoost Accuracy: {{ metrics.xgb_accuracy | round(4) }}</h3>
+            <h3>DNN Accuracy: {{ metrics.dnn_accuracy | round(4) }}</h3>
+        {% endif %}
+    </div>
+
+    <div class="summary-block">
+        <h3>Label Counts Summary</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>Actual</th>
+                    <th>Random Forest</th>
+                    <th>XGBoost</th>
+                    <th>DNN</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for label in all_labels %}
+                <tr>
+                    <td>{{ label }}</td>
+                    <td>{{ actual_counts.get(label, 0) }}</td>
+                    <td>{{ rf_counts.get(label, 0) }}</td>
+                    <td>{{ xgb_counts.get(label, 0) }}</td>
+                    <td>{{ dnn_counts.get(label, 0) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                {% if tables and tables[0] %}
+                    <th>Actual Label</th>
+                    <th>Random Forest Prediction</th>
+                    <th>XGBoost Prediction</th>
+                    <th>DNN Prediction</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(df.shape[0]) %}
+                <tr>
+                    <td>{{ df['label'][i] if 'label' in df.columns else 'N/A' }}</td>
+                    <td>{{ df['RandomForest_Pred'][i] }}</td>
+                    <td>{{ df['XGBoost_Pred'][i] }}</td>
+                    <td>{{ df['DNN_Pred'][i] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('index') }}">Back</a>
+</body>
+</html>

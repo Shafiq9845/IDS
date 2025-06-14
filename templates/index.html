@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual Testing UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            background: #1c2331;
+            min-height: 100vh;
+            height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #e0e6ed;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        .center-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100vw;
+        }
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #00fff7;
+            text-align: center;
+        }
+        .dropzone-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 340px;
+            height: 180px;
+            border: 2px dashed #00fff7;
+            border-radius: 12px;
+            cursor: pointer;
+            background: #232b3e;
+            transition: background 0.2s, border-color 0.2s;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .dropzone-label:hover,
+        .dropzone-label.hover,
+        .dropzone-label:focus-within {
+            background: #1c2331;
+            border-color: #1c92d2;
+        }
+        .dropzone-label svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 12px;
+            color: #00fff7;
+        }
+        .dropzone-label p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+        .dropzone-label .hint {
+            margin-top: 4px;
+            font-size: 0.85rem;
+            color: #6ee7ef;
+        }
+        input[type="file"].hidden-input {
+            display: none;
+        }
+        input[type="submit"] {
+            background: #00fff7;
+            color: #232b3e;
+            border: none;
+            border-radius: 6px;
+            padding: 0.7rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            margin-top: 1rem;
+        }
+        input[type="submit"]:hover {
+            background: #1c92d2;
+            color: #fff;
+        }
+        ul {
+            margin-top: 1.5rem;
+            padding: 0;
+            list-style: none;
+            text-align: center;
+        }
+        li {
+            color: #ff4b2b;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+        /* Loading overlay styles */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(28,35,49,0.85);
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .loading-overlay > div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .loader {
+            border: 6px solid #232b3e;
+            border-top: 6px solid #00fff7;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg);}
+            100% { transform: rotate(360deg);}
+        }
+        .loading-text {
+            color: #00fff7;
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: center;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropzone = document.querySelector('.dropzone-label');
+            const fileInput = document.getElementById('dropzone-file');
+            const form = dropzone.closest('form');
+            const hint = dropzone.querySelector('.hint');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            // Visual feedback for drag & drop
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('hover');
+            });
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('hover');
+            });
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('hover');
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    fileInput.files = files;
+                    hint.textContent = files[0].name;
+                }
+            });
+
+            // Click and keyboard accessibility
+            dropzone.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInput.click();
+                }
+            });
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    hint.textContent = fileInput.files[0].name;
+                } else {
+                    hint.textContent = "CSV only (max 10MB)";
+                }
+            });
+
+            form.addEventListener('submit', (e) => {
+                const file = fileInput.files[0];
+                let errorMsg = "";
+
+                if (!file) {
+                    errorMsg = "Please select a CSV file.";
+                } else if (!file.name.toLowerCase().endsWith(".csv")) {
+                    errorMsg = "Only CSV files are allowed.";
+                } else if (file.size > 10 * 1024 * 1024) {
+                    errorMsg = "File must be less than 10MB.";
+                }
+
+                if (errorMsg) {
+                    alert(errorMsg);
+                    e.preventDefault();
+                } else {
+                    // Show loading overlay
+                    loadingOverlay.classList.add('active');
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="center-container">
+        <div id="loading-overlay" class="loading-overlay">
+            <div>
+                <div class="loader"></div>
+                <div class="loading-text">Processing... Please wait</div>
+            </div>
+        </div>
+        <h2>Upload CSV for Prediction</h2>
+        <form action="/predict_csv" method="post" enctype="multipart/form-data" novalidate>
+            <label for="dropzone-file" class="dropzone-label" tabindex="0" role="button" aria-label="Upload CSV file">
+                <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V4m0 0L8 8m4-4l4 4" />
+                </svg>
+                <p><strong>Click to upload</strong> or drag and drop</p>
+                <p class="hint">CSV only (max 10MB)</p>
+                <input id="dropzone-file" class="hidden-input" type="file" name="csv_file" accept=".csv" required>
+            </label>
+            <input type="submit" value="Predict">
+        </form>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
